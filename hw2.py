@@ -78,6 +78,7 @@ def determineBestFeature(examples, target, attributes):
         gain = calculateGain(examples, target, attribute)
 #        print("Gain = {} for attribute = {}".format(gain, attribute))
         if gain > largestGain:
+#            print("Found larger gain at index = {}".format(index))
             featureToSelectIndex = index
             largestGain = gain
 #    print("Attribute with highest gain = {}".format(attributes[featureToSelectIndex]))
@@ -96,6 +97,11 @@ def getMajorityClass(examples, target):
 
 
 def id3(examples, target, attributes):
+
+    if(len(attributes) == 0):
+        majorityClass = getMajorityClass(examples, target)
+        return DecisionNode(majorityClass)
+
     countOfExamples = len(examples)
 #    print("Checking if all examples belong to one class..")
     possibleTargetValues =  getPossibleValuesFeatureHas(examples, target)
@@ -109,12 +115,14 @@ def id3(examples, target, attributes):
 #    print("The best feature is: {}".format(feature))
     rootNode = DecisionNode(feature)
     possibleAttributeValues = getPossibleValuesFeatureHas(examples, feature)
+#    print("Possible values {} has are: {}".format(feature, possibleAttributeValues))
     for possibleValue in possibleAttributeValues:
 #        print("Looking at possible value of = {}".format(possibleValue))
         subsetOfExamplesForAttribute = examples[examples[feature] == possibleValue]
         if len(subsetOfExamplesForAttribute) != 0:
 #            print("Call id3")
-            rootNode.children[possibleValue] = id3(subsetOfExamplesForAttribute, target, attributes)
+            filteredAttributes = [x for x in attributes if x !=feature]
+            rootNode.children[possibleValue] = id3(subsetOfExamplesForAttribute, target, filteredAttributes)
         else:
 #            print("choose majority class")
             majorityClass = getMajorityClass(subsetOfExamplesForAttribute, target)
